@@ -1,4 +1,276 @@
+<!-- ...existing code... -->
 <!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Prototipo - Sistema Minisuper</title>
+<style>
+  :root{
+    --bg: #0d0d0d;
+    --surface: #141414;
+    --muted: #1a1a1a;
+    --border: #2b2b2b;
+    --text: #e6e6e6;
+    --subtext: #a8a8a8;
+    --accent: #6e6e6e;
+    --accent-strong: #8a8a8a;
+    --success: #3b7a3b;
+    --warning: #7a5a3a;
+    --danger: #8a2b2b;
+    --muted-hover: rgba(230,230,230,0.03);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', Arial, sans-serif; background: var(--bg); color: var(--text); }
+
+  /* ── NAV ── */
+  .topbar { background: var(--surface); color: var(--text); display: flex; align-items: center; padding: 0 20px; height: 52px; gap: 16px; position: sticky; top:0; z-index: 100; box-shadow: 0 2px 8px rgba(0,0,0,.6); }
+  .topbar .logo { font-size: 18px; font-weight: 700; letter-spacing: 1px; }
+  .topbar .logo span { color: var(--subtext); }
+  .topbar .subtitle { font-size: 11px; color: var(--subtext); margin-left: 4px; }
+  .user-badge { margin-left: auto; background: rgba(230,230,230,.03); border-radius: 20px; padding: 4px 12px; font-size: 12px; color: var(--text); }
+
+  /* ── SIDEBAR ── */
+  .layout { display: flex; min-height: calc(100vh - 52px); }
+  .sidebar { width: 200px; background: var(--muted); padding: 16px 0; flex-shrink: 0; }
+  .sidebar-section { font-size: 9px; color: var(--subtext); text-transform: uppercase; letter-spacing: 1px; padding: 12px 16px 4px; }
+  .nav-item { display: flex; align-items: center; gap: 10px; padding: 9px 16px; cursor: pointer; color: var(--subtext); font-size: 13px; transition: all .15s; border-left: 3px solid transparent; }
+  .nav-item:hover { background: var(--muted-hover); color: var(--text); }
+  .nav-item.active { background: rgba(110,110,110,.08); color: var(--accent); border-left-color: var(--accent-strong); }
+  .nav-icon { font-size: 16px; }
+
+  /* ── MAIN ── */
+  .main { flex: 1; padding: 24px; overflow-y: auto; }
+  .page { display: none; }
+  .page.active { display: block; }
+
+  /* ── CARDS ── */
+  .card { background: var(--surface); border-radius: 8px; box-shadow: 0 1px 6px rgba(0,0,0,.6); padding: 20px; margin-bottom: 20px; border: 1px solid var(--border); }
+  .card-title { font-size: 15px; font-weight: 600; color: var(--accent); margin-bottom: 14px; display: flex; align-items: center; gap: 8px; border-bottom: 2px solid rgba(255,255,255,.02); padding-bottom: 8px; }
+  .page-header { font-size: 20px; font-weight: 700; color: var(--accent); margin-bottom: 18px; display: flex; align-items: center; gap: 10px; }
+
+  /* ── STATS ── */
+  .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 20px; }
+  .stat { background: var(--muted); border-radius: 8px; padding: 16px; box-shadow: 0 1px 6px rgba(0,0,0,.6); display: flex; flex-direction: column; gap: 4px; border-left: 4px solid var(--border); }
+  .stat .label { font-size: 11px; color: var(--subtext); text-transform: uppercase; letter-spacing: .5px; }
+  .stat .value { font-size: 26px; font-weight: 700; color: var(--text); }
+  .stat .change { font-size: 11px; color: var(--subtext); }
+
+  /* ── FORM ── */
+  .form-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+  .form-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .form-group { display: flex; flex-direction: column; gap: 4px; }
+  .form-group label { font-size: 11px; color: var(--subtext); font-weight: 600; text-transform: uppercase; letter-spacing: .4px; }
+  .form-group input, .form-group select, .form-group textarea {
+    border: 1.5px solid var(--border); border-radius: 5px; padding: 8px 10px; font-size: 13px; color: var(--text);
+    background: var(--muted); transition: border-color .15s; outline: none;
+  }
+  .form-group input:focus, .form-group select:focus { border-color: var(--accent); background: var(--surface); }
+  .form-group .hint { font-size: 10px; color: var(--subtext); }
+
+  /* ── BUTTONS ── */
+  .btn { padding: 8px 18px; border-radius: 5px; border: none; cursor: pointer; font-size: 13px; font-weight: 600; transition: all .15s; display: inline-flex; align-items: center; gap: 6px; color: var(--text); }
+  .btn-primary { background: var(--accent); color: var(--text); }
+  .btn-primary:hover { background: var(--accent-strong); }
+  .btn-success { background: var(--success); color: var(--text); }
+  .btn-success:hover { background: #2f6b2f; }
+  .btn-warning { background: var(--warning); color: var(--text); }
+  .btn-warning:hover { background: #6a4a2a; }
+  .btn-ghost { background: transparent; color: var(--subtext); border: 1px solid rgba(255,255,255,.03); }
+  .btn-ghost:hover { background: var(--muted-hover); color: var(--text); }
+  .btn-sm { padding: 5px 10px; font-size: 11px; }
+  .btn-bar { display: flex; gap: 10px; margin-top: 16px; flex-wrap: wrap; }
+
+  /* ── TABLE ── */
+  table { width: 100%; border-collapse: collapse; font-size: 13px; color: var(--text); }
+  th { background: var(--muted); color: var(--subtext); font-weight: 600; text-align: left; padding: 9px 12px; font-size: 11px; text-transform: uppercase; letter-spacing: .4px; border-bottom: 1px solid var(--border); }
+  td { padding: 9px 12px; border-bottom: 1px solid var(--border); color: var(--text); }
+  tr:hover td { background: var(--muted-hover); }
+  .badge { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 10px; font-weight: 700; background: rgba(255,255,255,.03); color: var(--text); border: 1px solid rgba(255,255,255,.02); }
+  .badge-green { background: rgba(59,122,59,.12); color: var(--text); }
+  .badge-red { background: rgba(138,43,43,.12); color: var(--text); }
+  .badge-blue { background: rgba(110,110,110,.12); color: var(--text); }
+  .badge-orange { background: rgba(122,90,58,.12); color: var(--text); }
+
+  /* ── SEARCH BAR ── */
+  .search-bar { display: flex; gap: 10px; margin-bottom: 16px; align-items: center; }
+  .search-input { flex: 1; border: 1.5px solid var(--border); border-radius: 5px; padding: 8px 12px; font-size: 13px; outline: none; background: var(--muted); color: var(--text); }
+  .search-input:focus { border-color: var(--accent); }
+
+  /* ── SALE DETAIL TABLE ── */
+  .detail-table { width: 100%; border-collapse: collapse; margin-top: 12px; font-size: 13px; }
+  .detail-table th { background: rgba(255,255,255,.02); color: var(--accent); padding: 8px; border: 1px solid var(--border); }
+  .detail-table td { padding: 8px; border: 1px solid var(--border); color: var(--text); }
+  .detail-table tfoot td { background: rgba(255,255,255,.02); font-weight: 600; color: var(--accent); }
+
+  /* ── RADIO / TOGGLE ── */
+  .toggle-group { display: flex; gap: 8px; }
+  .toggle-opt { padding: 7px 16px; border-radius: 5px; border: 1.5px solid var(--border); background: var(--muted); cursor: pointer; font-size: 13px; color: var(--subtext); transition: all .15s; }
+  .toggle-opt.sel { background: var(--accent); color: var(--text); border-color: var(--accent); }
+
+  /* ── TABS ── */
+  .tabs { display: flex; gap: 2px; margin-bottom: 16px; border-bottom: 2px solid rgba(255,255,255,.02); }
+  .tab { padding: 8px 18px; cursor: pointer; font-size: 13px; color: var(--subtext); border-bottom: 2px solid transparent; margin-bottom: -2px; transition: all .15s; }
+  .tab.active { color: var(--accent); border-bottom-color: var(--accent); font-weight: 600; }
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+
+  /* ── ALERT ── */
+  .alert { padding: 10px 14px; border-radius: 5px; font-size: 13px; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
+  .alert-info { background: rgba(110,110,110,.05); color: var(--text); border-left: 4px solid var(--accent); }
+  .alert-warn { background: rgba(122,90,58,.05); color: var(--text); border-left: 4px solid var(--warning); }
+  .alert-err  { background: rgba(138,43,43,.05); color: var(--text); border-left: 4px solid var(--danger); }
+
+  /* ── WIREFRAME ANNOTATIONS ── */
+  .wire-note { font-size: 10px; color: var(--subtext); font-style: italic; margin-top: 4px; }
+
+  /* ── CHART PLACEHOLDER ── */
+  .chart-placeholder { background: rgba(255,255,255,.02); border: 2px dashed var(--border); border-radius: 8px; height: 180px; display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--subtext); font-size: 22px; gap: 6px; }
+  .chart-placeholder span { font-size: 13px; }
+
+  /* ── CRÉDITO SUMMARY ── */
+  .credit-bar { background: rgba(255,255,255,.02); border-radius: 4px; height: 8px; margin-top: 6px; overflow: hidden; }
+  .credit-fill { height: 100%; border-radius: 4px; }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 900px) { .stats { grid-template-columns: 1fr 1fr; } .form-grid { grid-template-columns: 1fr 1fr; } }
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <div>
+    <div class="logo"> Mini<span>Súper</span></div>
+    <div class="subtitle">Sistema de Gestión Comercial</div>
+  </div>
+  <div style="margin-left:auto;display:flex;align-items:center;gap:12px;">
+    <span style="font-size:12px;color:var(--subtext);"> <span id="clock"></span></span>
+    <div class="user-badge"> Admin Dueño</div>
+  </div>
+</div>
+
+<div class="layout">
+
+<!-- SIDEBAR -->
+<nav class="sidebar">
+  <div class="sidebar-section">Principal</div>
+  <div class="nav-item active" onclick="showPage('dashboard')"><span class="nav-icon"></span>Dashboard</div>
+
+  <div class="sidebar-section">Ventas</div>
+  <div class="nav-item" onclick="showPage('nueva-venta')"><span class="nav-icon"></span>Nueva Venta</div>
+  <div class="nav-item" onclick="showPage('historial-ventas')"><span class="nav-icon"></span>Historial Ventas</div>
+
+  <div class="sidebar-section">Clientes</div>
+  <div class="nav-item" onclick="showPage('clientes')"><span class="nav-icon"></span>Clientes</div>
+  <div class="nav-item" onclick="showPage('cuentas-credito')"><span class="nav-icon"></span>Cuentas Crédito</div>
+
+  <div class="sidebar-section">Inventario</div>
+  <div class="nav-item" onclick="showPage('articulos')"><span class="nav-icon"></span>Artículos</div>
+  <div class="nav-item" onclick="showPage('proveedores')"><span class="nav-icon"></span>Proveedores</div>
+  <div class="nav-item" onclick="showPage('compras')"><span class="nav-icon"></span>Compras</div>
+
+  <div class="sidebar-section">Consultas</div>
+  <div class="nav-item" onclick="showPage('consultas')"><span class="nav-icon"></span>Consultas</div>
+</nav>
+
+<!-- MAIN CONTENT -->
+<main class="main">
+
+  <!-- ===== DASHBOARD ===== -->
+  <div class="page active" id="page-dashboard">
+    <div class="page-header"> Dashboard</div>
+
+    <div class="stats">
+      <div class="stat">
+        <div class="label">Ventas Hoy</div>
+        <div class="value">$3,450</div>
+        <div class="change">↑ 12% vs ayer</div>
+      </div>
+      <div class="stat">
+        <div class="label">Artículos en Stock</div>
+        <div class="value">248</div>
+        <div class="change">6 con stock bajo</div>
+      </div>
+      <div class="stat">
+        <div class="label">Clientes Activos</div>
+        <div class="value">87</div>
+        <div class="change">14 con crédito</div>
+      </div>
+      <div class="stat">
+        <div class="label">Por Cobrar</div>
+        <div class="value">$8,720</div>
+        <div class="change">5 vencidos</div>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+      <div class="card">
+        <div class="card-title"> Ventas del Mes</div>
+        <div class="chart-placeholder"><span>Gráfica de barras — Ventas diarias</span></div>
+        <p class="wire-note">[ Gráfica de barras con ventas por día del mes ]</p>
+      </div>
+      <div class="card">
+        <div class="card-title"> Alertas del Sistema</div>
+        <div class="alert alert-warn"> 6 artículos con stock menor al mínimo</div>
+        <div class="alert alert-err"> 5 créditos vencidos sin pago</div>
+        <div class="alert alert-info">ℹ 3 compras pendientes de recepción</div>
+        <br>
+        <div class="card-title" style="margin-top:8px;"> Top Artículos Vendidos</div>
+        <table>
+          <tr><th>Artículo</th><th>Cant.</th><th>Total</th></tr>
+          <tr><td>Coca-Cola 600ml</td><td>142</td><td>$1,278</td></tr>
+          <tr><td>Sabritas Original</td><td>98</td><td>$784</td></tr>
+          <tr><td>Leche Lala 1L</td><td>76</td><td>$912</td></tr>
+          <tr><td>Pan Bimbo</td><td>65</td><td>$585</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- rest of pages unchanged -->
+  <!-- ...existing code... -->
+
+</main>
+</div>
+
+<script>
+  // Clock
+  function updateClock() {
+    const now = new Date();
+    document.getElementById('clock').textContent = now.toLocaleTimeString('es-MX', {hour:'2-digit',minute:'2-digit'});
+  }
+  updateClock(); setInterval(updateClock, 1000);
+
+  // Navigation
+  function showPage(id) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    document.getElementById('page-' + id).classList.add('active');
+    event.currentTarget.classList.add('active');
+  }
+
+  // Tabs
+  function showTab(page, tab) {
+    const allContents = document.querySelectorAll('#page-' + page + ' .tab-content');
+    const allTabs = document.querySelectorAll('#page-' + page + ' .tab');
+    allContents.forEach(c => c.classList.remove('active'));
+    allTabs.forEach(t => t.classList.remove('active'));
+    document.getElementById('tab-' + page + '-' + tab).classList.add('active');
+    event.currentTarget.classList.add('active');
+  }
+
+  // Toggle venta type
+  function toggleVenta(type) {
+    document.getElementById('t-contado').classList.toggle('sel', type === 'contado');
+    document.getElementById('t-credito').classList.toggle('sel', type === 'credito');
+    document.getElementById('campo-cliente').style.display = type === 'credito' ? 'flex' : 'none';
+  }
+</script>
+</body>
+</html>
+<!-- ...existing code... --><!DOCTYPE html>
 <html lang="es">
 <head>
 <meta charset="UTF-8">
